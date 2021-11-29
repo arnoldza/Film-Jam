@@ -1,3 +1,20 @@
 <resources>
     <string name="app_name">Film Jam</string>
+    <string name="title">Film Jam!</string>
+    <string name="high_score">High Score: %1d</string>
+    <string name="start">Start Game</string>
+    <string name="subtitle">The self-generated Movie Trivia game!</string>
+    <string name="category">Pick a trivia category:</string>
+    <string name="leaderboard">Leaderboard</string>
+    <string name="dummy_rank">1st</string>
+    <string name="dummy_name">DUM</string>
+    <string name="dummy_score">15900</string>
+    <string name="placed">Congratulations! You scored %1d points!</string>
+    <string name="enter_initials">Enter your initials!</string>
+    <string name="same_game">Replay Same Game</string>
+    <string name="main_menu">Main Menu</string>
+    <string name="add_fail">Failed to add entry to Leaderboard</string>
+    <string name="dummy_answer">Dummy Answer!</string>
+    <string name="dummy_question">This is a dummy question?</string>
+    <string name="score">Score: %1d</string>
 </resources>

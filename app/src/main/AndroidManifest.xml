@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="edu.msu.arnoldza.filmjam">
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,6 +12,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FilmJam">
+        <activity
+            android:name=".LostActivity"
+            android:exported="true" />
+        <activity
+            android:name=".TriviaActivity"
+            android:exported="true" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
