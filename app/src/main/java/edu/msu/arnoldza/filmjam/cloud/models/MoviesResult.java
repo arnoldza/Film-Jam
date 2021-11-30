@@ -57,4 +57,13 @@ public class MoviesResult {
     public void setTotalPages(int totalPages) {
         this.totalPages = totalPages;
     }
+
+    public MoviesResult(int page, ArrayList<Movie> movies, int totalResults, int totalPages) {
+        this.page = page;
+        this.movies = movies;
+        this.totalResults = totalResults;
+        this.totalPages = totalPages;
+    }
+
+    public MoviesResult() {}
 }

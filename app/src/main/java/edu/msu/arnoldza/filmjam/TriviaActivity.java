@@ -1,5 +1,7 @@
 package edu.msu.arnoldza.filmjam;
 
+import static edu.msu.arnoldza.filmjam.Game.CORRECT;
+
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -62,7 +64,7 @@ public class TriviaActivity extends AppCompatActivity {
     /**
      * Time in milliseconds for response message to be visible
      */
-    private static final int MESSAGE_INTERVAL_MILLISECONDS = 1000;
+    private static final int MESSAGE_INTERVAL_MILLISECONDS = 2000;
 
     /**
      * Question set generator class
@@ -155,7 +157,7 @@ public class TriviaActivity extends AppCompatActivity {
     /**
      * Update Game Metadata in UI - score, lives left, load message into UI
      */
-    public void updateGameDataView(Game.State gameState, int livesLeft, int score, String question,
+    public void updateGameDataView(String result, int livesLeft, int score, String question,
                                    String posterPath, String a, String b, String c, String d) {
 
         ImageView heartOne = findViewById(R.id.heartOneImageView);
@@ -186,14 +188,15 @@ public class TriviaActivity extends AppCompatActivity {
         getChoiceCButton().setText(c);
         getChoiceDButton().setText(d);
 
-        if (gameState == Game.State.INIT) {
+        if (result.isEmpty()) {
             getQuestionTextView().setText(question);
             getQuestionTextView().setTextColor(getResources().getColor(R.color.black));
             getQuestionTextView().setTypeface(null, Typeface.ITALIC);
         } else {
             // Set response message
-            getQuestionTextView().setText(gameState == Game.State.CORRECT ? R.string.correct : R.string.wrong);
-            getQuestionTextView().setTextColor(gameState == Game.State.CORRECT ? getResources().getColor(R.color.correct)
+            getQuestionTextView().setText(result);
+            getQuestionTextView().setTextColor(result.equals(CORRECT) ?
+                    getResources().getColor(R.color.correct)
                     : getResources().getColor(R.color.wrong));
             getQuestionTextView().setTypeface(null, Typeface.BOLD);
 

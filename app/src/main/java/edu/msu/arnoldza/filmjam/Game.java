@@ -17,12 +17,10 @@ public class Game {
     public final static int D = 3;
 
     /**
-     * Current state of game
+     * Result strings for UI
      */
-    enum State {
-        INIT, CORRECT, WRONG;
-    }
-    private State state = State.INIT;
+    public final static String CORRECT = "Correct!";
+    public final static String WRONG = "Wrong! It's ";
 
     /**
      * Score of game currently
@@ -53,7 +51,7 @@ public class Game {
         this.activity = activity;
         this.questionSet = questionSet;
 
-        updateUI();
+        updateUI("");
     }
 
     /**
@@ -70,26 +68,27 @@ public class Game {
 
         // If answer is correct
         if (getCurrentQuestion().getAnswer().equals(answer)) {
-            this.state = State.CORRECT;
             // Increase score
             int exponent = questionIndex / 5;
             this.score += 20 * Math.pow(2, (exponent));
+            this.questionIndex++;
+            this.updateUI(CORRECT);
         } else {
-            this.state = State.WRONG;
             // Remove life
             this.livesLeft--;
             if (this.livesLeft == 0) {
                 this.activity.moveToLostActivity(this.score);
             }
+            String correctAnswer = getCurrentQuestion().getAnswer();
+            this.questionIndex++;
+            this.updateUI(WRONG + correctAnswer);
         }
-        this.questionIndex++;
-        this.updateUI();
     }
 
     /**
      * Update User Interface with current question details
      */
-    private void updateUI() {
+    private void updateUI(String result) {
 
         // Get current question and corresponding answer
         Question currentQuestion = this.getCurrentQuestion();
@@ -111,7 +110,7 @@ public class Game {
         String choiceD = choicesArray.get(D);
 
         // Activity updates UI
-        activity.updateGameDataView(this.state, this.livesLeft, this.score,
+        activity.updateGameDataView(result, this.livesLeft, this.score,
                 question, posterPath, choiceA, choiceB, choiceC, choiceD);
     }
 }

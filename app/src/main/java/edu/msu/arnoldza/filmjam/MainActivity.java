@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.Spinner;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import edu.msu.arnoldza.filmjam.cloud.MovieAPI;
 import edu.msu.arnoldza.filmjam.cloud.models.Genre;
@@ -40,16 +41,16 @@ public class MainActivity extends AppCompatActivity {
     public static final String _2010s = "2010s";
 
     /**
-     * Represent the category (and possible subcategory) of the trivia game
-     */
-    private String category;
-    private String subCategory;
-
-    /**
      * Subcategory Spinner Adapters
      */
     private ArrayAdapter<String> genreAdapter;
     private ArrayAdapter<String> decadesAdapter;
+
+    /**
+     * Corresponding integer values for subcategories for use in HTTP calls
+     */
+    public static final HashMap<String, Integer> genreIds = new HashMap<>();
+    public static final HashMap<String, Integer> decadeValues = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,22 +65,30 @@ public class MainActivity extends AppCompatActivity {
             dlg.show(getSupportFragmentManager(), "leaderboard");
         });
 
-        // Setup spinners
+        // Setup category spinner
         setupCategorySpinner();
-        setupSubCategorySpinner();
+
+        // Setup subcategory adapters
+        setupGenreSpinnerAdapter();
+        setupDecadesSpinnerAdapter();
 
         // Setup start game button
         Button startButton = findViewById(R.id.startButton);
         startButton.setOnClickListener((View view) -> {
-            // TODO: Remove this if statement - app currently crashes otherwise
-            if (this.category.equals(NOW_PLAYING)) {
-                // Move to trivia activity
-                Intent intent = new Intent(this, TriviaActivity.class);
-                intent.putExtra("category", this.category);
-                intent.putExtra("subcategory", this.subCategory);
-                startActivity(intent);
-                finish();
+
+            // Grab category & subcategory
+            String category = getCategorySpinner().getSelectedItem().toString();
+            String subCategory = "";
+            if (category.equals(GENRES) || category.equals(DECADES)) {
+                subCategory = getSubCategorySpinner().getSelectedItem().toString();
             }
+
+            // Move to trivia activity
+            Intent intent = new Intent(this, TriviaActivity.class);
+            intent.putExtra("category",category);
+            intent.putExtra("subcategory", subCategory);
+            startActivity(intent);
+            finish();
         });
 
     }
@@ -108,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> arg0, View view, int pos, long id) {
                 // Set category
-                category = getCategorySpinner().getSelectedItem().toString();
+                String category = getCategorySpinner().getSelectedItem().toString();
 
                 // Enable subcategory spinner if necessary
                 getSubCategorySpinner().setEnabled(category.equals(GENRES) || category.equals(DECADES));
@@ -131,30 +140,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Setup subcategory spinner
-     */
-    private void setupSubCategorySpinner() {
-        // Setup subcategory adapters
-        setupGenreSpinnerAdapter();
-        setupDecadesSpinnerAdapter();
-
-        // set up subcategory spinner on item selected
-        getSubCategorySpinner().setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
-
-            @Override
-            public void onItemSelected(AdapterView<?> arg0, View view, int pos, long id) {
-                // Set subcategory
-                subCategory = getSubCategorySpinner().getSelectedItem().toString();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> arg0) {
-            }
-
-        });
-    }
-
-    /**
      * Setup Subcategory Spinner's genre adapter
      */
     private void setupGenreSpinnerAdapter() {
@@ -164,12 +149,13 @@ public class MainActivity extends AppCompatActivity {
 
             // Get genres from API call
             MovieAPI movieAPI = new MovieAPI();
-            ArrayList<Genre> genres = movieAPI.getGenres();
+            ArrayList<Genre> genres = movieAPI.getAvailableGenres();
 
             // Populate spinner with genres
             ArrayList<String> spinnerGenres = new ArrayList<>();
             for (Genre genre : genres) {
                 spinnerGenres.add(genre.getName());
+                genreIds.put(genre.getName(), genre.getId());
             }
 
             // Set up adapter
@@ -189,6 +175,12 @@ public class MainActivity extends AppCompatActivity {
         spinnerDecades.add(_1990s);
         spinnerDecades.add(_2000s);
         spinnerDecades.add(_2010s);
+
+        decadeValues.put(_1970s, 1970);
+        decadeValues.put(_1980s, 1980);
+        decadeValues.put(_1990s, 1990);
+        decadeValues.put(_2000s, 2000);
+        decadeValues.put(_2010s, 2010);
 
         decadesAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, spinnerDecades);
         decadesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

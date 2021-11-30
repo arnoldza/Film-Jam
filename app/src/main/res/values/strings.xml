@@ -17,6 +17,5 @@
     <string name="dummy_answer">Dummy Answer!</string>
     <string name="dummy_question">This is a dummy question?</string>
     <string name="score">Score: %1d</string>
-    <string name="correct">Correct!</string>
-    <string name="wrong">Wrong!</string>
+    <string name="sure">I\'m Sure</string>
 </resources>

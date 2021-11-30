@@ -81,4 +81,15 @@ public class Movie {
     public void setTitle(String title) {
         this.title = title;
     }
+
+    public Movie(String posterPath, String overview, String releaseDate, ArrayList<Integer> genreIds, int id, String title) {
+        this.posterPath = posterPath;
+        this.overview = overview;
+        this.releaseDate = releaseDate;
+        this.genreIds = genreIds;
+        this.id = id;
+        this.title = title;
+    }
+
+    public Movie() {}
 }

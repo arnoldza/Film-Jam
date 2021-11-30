@@ -76,7 +76,7 @@ public class LostActivity extends AppCompatActivity {
                 moveToTriviaActivity();
             } else {
                 // Set positive button on click method to move to trivia activity
-                incompleteInitialsDlg.setPositiveButton(android.R.string.yes, (dialog, which) -> moveToTriviaActivity());
+                incompleteInitialsDlg.setPositiveButton(R.string.sure, (dialog, which) -> moveToTriviaActivity());
                 incompleteInitialsDlg.show();
             }
         });
@@ -90,7 +90,7 @@ public class LostActivity extends AppCompatActivity {
                 moveToMainActivity();
             } else {
                 // Set positive button on click method to move to main activity
-                incompleteInitialsDlg.setPositiveButton(android.R.string.yes, (dialog, which) -> moveToMainActivity());
+                incompleteInitialsDlg.setPositiveButton(R.string.sure, (dialog, which) -> moveToMainActivity());
                 incompleteInitialsDlg.show();
             }
         });
