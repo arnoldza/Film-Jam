@@ -1,11 +1,12 @@
 package edu.msu.arnoldza.filmjam;
 
-import android.content.res.Resources;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.View;
+import android.os.Handler;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -53,10 +54,15 @@ public class TriviaActivity extends AppCompatActivity {
          * Runs on the UI thread after doInBackground(Params...)
          */
         protected void onPostExecute(Bitmap result){
-            imageView.setImageBitmap(result);
+            // Set Question along with image load
+            this.imageView.setImageBitmap(result);
         }
     }
 
+    /**
+     * Time in milliseconds for response message to be visible
+     */
+    private static final int MESSAGE_INTERVAL_MILLISECONDS = 1000;
 
     /**
      * Question set generator class
@@ -68,64 +74,41 @@ public class TriviaActivity extends AppCompatActivity {
      */
     private Game game;
 
+    /**
+     * Represent the category (and possible subcategory) of the trivia game
+     */
+    private String category;
+    private String subCategory;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trivia);
 
         // Grab category & subcategory values passed in from MainActivity
-        String category = "";
-        String subcategory = "";
         Bundle categories = getIntent().getExtras();
         if (categories != null) {
             // Get category names
-            category = categories.getString("category");
-            subcategory = categories.getString("subcategory");
+            this.category = categories.getString("category");
+            this.subCategory = categories.getString("subcategory");
         }
 
         // Generate question set for game
-        ArrayList<Question> questionSet = this.questionSetGenerator.generateQuestionSet(category, subcategory);
+        ArrayList<Question> questionSet = this.questionSetGenerator.generateQuestionSet(this.category, this.subCategory);
 
         // Create game
         this.game = new Game(this, questionSet);
 
         // Set on click listeners for choice buttons
-        getChoiceAButton().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (getChoiceAButton().getText().toString().equals(game.getCurrentQuestion().getAnswer())) {
-                    game.moveToNextQuestion();
-                }
-            }
-        });
+        getChoiceAButton().setOnClickListener(view -> game.chooseAnswer(getChoiceAButton().getText().toString()));
+        getChoiceBButton().setOnClickListener(view -> game.chooseAnswer(getChoiceBButton().getText().toString()));
+        getChoiceCButton().setOnClickListener(view -> game.chooseAnswer(getChoiceCButton().getText().toString()));
+        getChoiceDButton().setOnClickListener(view -> game.chooseAnswer(getChoiceDButton().getText().toString()));
 
-        getChoiceBButton().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (getChoiceBButton().getText().toString().equals(game.getCurrentQuestion().getAnswer())) {
-                    game.moveToNextQuestion();
-                }
-            }
-        });
+    }
 
-        getChoiceCButton().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (getChoiceCButton().getText().toString().equals(game.getCurrentQuestion().getAnswer())) {
-                    game.moveToNextQuestion();
-                }
-            }
-        });
-
-        getChoiceDButton().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (getChoiceDButton().getText().toString().equals(game.getCurrentQuestion().getAnswer())) {
-                    game.moveToNextQuestion();
-                }
-            }
-        });
-
+    private TextView getQuestionTextView() {
+        return findViewById(R.id.questionTextView);
     }
 
     /**
@@ -157,9 +140,23 @@ public class TriviaActivity extends AppCompatActivity {
     }
 
     /**
-     * Update UI of the game
+     * Move into Lost Activity
      */
-    public void updateUI(int livesLeft, int score, String question, String posterPath, String a, String b, String c, String d) {
+    public void moveToLostActivity(int score) {
+        // Move to lost activity
+        Intent intent = new Intent(this, LostActivity.class);
+        intent.putExtra("score", score);
+        intent.putExtra("category", this.category);
+        intent.putExtra("subcategory", this.subCategory);
+        startActivity(intent);
+        finish();
+    }
+
+    /**
+     * Update Game Metadata in UI - score, lives left, load message into UI
+     */
+    public void updateGameDataView(Game.State gameState, int livesLeft, int score, String question,
+                                   String posterPath, String a, String b, String c, String d) {
 
         ImageView heartOne = findViewById(R.id.heartOneImageView);
         ImageView heartTwo = findViewById(R.id.heartTwoImageView);
@@ -176,24 +173,41 @@ public class TriviaActivity extends AppCompatActivity {
         }
 
         // Set score text view
-        Resources res = getResources();
-        String scoreText = res.getString(R.string.score, score);
+        String scoreText = getResources().getString(R.string.score, score);
         TextView scoreTextView = findViewById(R.id.scoreTextView);
         scoreTextView.setText(scoreText);
 
-        // Set question text view
-        TextView questionTextView = findViewById(R.id.questionTextView);
-        questionTextView.setText(question);
-
         // Set poster image view
-        ImageView posterImageView = findViewById(R.id.posterImageView);
-        new DownLoadImageTask(posterImageView).execute(posterPath);
+        new DownLoadImageTask(findViewById(R.id.posterImageView)).execute(posterPath);
 
-        // Set choice buttons text
+        // Set answer button text
         getChoiceAButton().setText(a);
         getChoiceBButton().setText(b);
         getChoiceCButton().setText(c);
         getChoiceDButton().setText(d);
+
+        if (gameState == Game.State.INIT) {
+            getQuestionTextView().setText(question);
+            getQuestionTextView().setTextColor(getResources().getColor(R.color.black));
+            getQuestionTextView().setTypeface(null, Typeface.ITALIC);
+        } else {
+            // Set response message
+            getQuestionTextView().setText(gameState == Game.State.CORRECT ? R.string.correct : R.string.wrong);
+            getQuestionTextView().setTextColor(gameState == Game.State.CORRECT ? getResources().getColor(R.color.correct)
+                    : getResources().getColor(R.color.wrong));
+            getQuestionTextView().setTypeface(null, Typeface.BOLD);
+
+            // Set new question title after message interval
+            Handler handler = new Handler();
+            Runnable runnable = () -> {
+                getQuestionTextView().setText(question);
+                getQuestionTextView().setTextColor(getResources().getColor(R.color.black));
+                getQuestionTextView().setTypeface(null, Typeface.ITALIC);
+            };
+
+            handler.postAtTime(runnable, System.currentTimeMillis() + MESSAGE_INTERVAL_MILLISECONDS);
+            handler.postDelayed(runnable, MESSAGE_INTERVAL_MILLISECONDS);
+        }
     }
 
 }

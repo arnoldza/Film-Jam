@@ -44,7 +44,8 @@
             android:layout_weight="1.5"
             android:fontFamily="monospace"
             android:text="@string/score"
-            android:textAlignment="viewEnd"
+            android:textAlignment="center"
+            android:textColor="@color/black"
             android:textSize="20sp" />
     </LinearLayout>
 
@@ -77,7 +78,9 @@
             android:layout_height="wrap_content"
             android:text="@string/dummy_question"
             android:textAlignment="center"
-            android:textSize="20sp" />
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="italic" />
 
         <Button
             android:id="@+id/choiceAButton"

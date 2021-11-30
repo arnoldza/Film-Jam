@@ -3,6 +3,7 @@ package edu.msu.arnoldza.filmjam;
 import static edu.msu.arnoldza.filmjam.MainActivity.NOW_PLAYING;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import edu.msu.arnoldza.filmjam.cloud.MovieAPI;
 import edu.msu.arnoldza.filmjam.cloud.models.Movie;
@@ -52,6 +53,7 @@ public class QuestionSetGenerator {
         }
 
         // Return set of questions
+        Collections.shuffle(questionSet);
         return questionSet;
     }
 

@@ -15,7 +15,7 @@
         android:layout_weight="2"
         android:fontFamily="monospace"
         android:gravity="center"
-        android:text="@string/placed"
+        android:text="@string/congrats"
         android:textAlignment="center"
         android:textSize="24sp" />
 

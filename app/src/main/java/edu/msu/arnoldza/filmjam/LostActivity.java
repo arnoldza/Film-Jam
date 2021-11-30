@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -24,35 +26,41 @@ import edu.msu.arnoldza.filmjam.cloud.Cloud;
  */
 public class LostActivity extends AppCompatActivity {
 
-    // TODO: Temporary final score, eventually needs to be passed from trivia activity
-    int finalScore = 700;
+    /**
+     * Final score from game
+     */
+    int finalScore;
 
-    public void hideSoftKeyboard() {
-        InputMethodManager inputMethodManager =
-                (InputMethodManager) this.getSystemService(
-                        this.INPUT_METHOD_SERVICE);
-        if(inputMethodManager.isAcceptingText()){
-            inputMethodManager.hideSoftInputFromWindow(
-                    this.getCurrentFocus().getWindowToken(),
-                    0
-            );
-        }
-    }
+    /**
+     * Represent the category (and possible subcategory) of the trivia game
+     */
+    private String category;
+    private String subCategory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lost);
 
+        // Grab score, category & subcategory values passed in from TriviaActivity
+        Bundle categories = getIntent().getExtras();
+        if (categories != null) {
+            // Get category names
+            this.category = categories.getString("category");
+            this.subCategory = categories.getString("subcategory");
+            this.finalScore = categories.getInt("score");
+        }
+
+        // Set final score text
+        Resources res = getResources();
+        String scoreText = res.getString(R.string.congrats, this.finalScore);
+        TextView scoreTextView = findViewById(R.id.congratsTextView);
+        scoreTextView.setText(scoreText);
+
         //Dialogue box shows when user has incomplete initials
         AlertDialog.Builder incompleteInitialsDlg = new AlertDialog.Builder(this)
             .setTitle("Incomplete Initials")
             .setMessage("Are you sure you don't want your initials on the leaderboard?")
-            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    moveToMainActivity();
-                }
-            })
             .setNegativeButton(android.R.string.no, null)
             .setIcon(android.R.drawable.ic_dialog_alert);
 
@@ -60,33 +68,30 @@ public class LostActivity extends AppCompatActivity {
         setKeyboardHideParams();
 
         // Setup replay button
-        // TODO: Add logic to replay using same question set - currently sends back to menu
         Button replayButton = findViewById(R.id.replayButton);
-        replayButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (getInitialsEditText().getText().length() == 3) {
-                    addEntryToCloudLeaderboard(getInitialsEditText().getText().toString(),
-                            String.valueOf(finalScore));
-                    moveToMainActivity();
-                } else {
-                    incompleteInitialsDlg.show();
-                }
+        replayButton.setOnClickListener(view -> {
+            if (getInitialsEditText().getText().length() == 3) {
+                addEntryToCloudLeaderboard(getInitialsEditText().getText().toString(),
+                        String.valueOf(finalScore));
+                moveToTriviaActivity();
+            } else {
+                // Set positive button on click method to move to trivia activity
+                incompleteInitialsDlg.setPositiveButton(android.R.string.yes, (dialog, which) -> moveToTriviaActivity());
+                incompleteInitialsDlg.show();
             }
         });
 
         // Setup menu button
         Button menuButton = findViewById(R.id.menuButton);
-        menuButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (getInitialsEditText().getText().length() == 3) {
-                    addEntryToCloudLeaderboard(getInitialsEditText().getText().toString(),
-                            String.valueOf(finalScore));
-                    moveToMainActivity();
-                } else {
-                    incompleteInitialsDlg.show();
-                }
+        menuButton.setOnClickListener(view -> {
+            if (getInitialsEditText().getText().length() == 3) {
+                addEntryToCloudLeaderboard(getInitialsEditText().getText().toString(),
+                        String.valueOf(finalScore));
+                moveToMainActivity();
+            } else {
+                // Set positive button on click method to move to main activity
+                incompleteInitialsDlg.setPositiveButton(android.R.string.yes, (dialog, which) -> moveToMainActivity());
+                incompleteInitialsDlg.show();
             }
         });
     }
@@ -122,15 +127,12 @@ public class LostActivity extends AppCompatActivity {
             }
         });
 
-        getInitialsEditText().setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
-                if(keyCode == KeyEvent.KEYCODE_DEL && getInitialsEditText().getText().length() == 0) {
-                    // If backspace on empty edit text dismiss keyboard
-                    hideSoftKeyboard();
-                }
-                return false;
+        getInitialsEditText().setOnKeyListener((view, keyCode, keyEvent) -> {
+            if(keyCode == KeyEvent.KEYCODE_DEL && getInitialsEditText().getText().length() == 0) {
+                // If backspace on empty edit text dismiss keyboard
+                hideSoftKeyboard();
             }
+            return false;
         });
     }
 
@@ -142,39 +144,58 @@ public class LostActivity extends AppCompatActivity {
         final View view = findViewById(android.R.id.content).getRootView();
         final LostActivity activity = this;
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+        new Thread(() -> {
 
-                Cloud cloud = new Cloud();
-                boolean success;
-                try {
-                    success = cloud.addEntryToLeaderboard(name, score);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    success = false;
-                }
-                if(!success) {
-                    /*
-                     * If we fail to save, display a toast
-                     */
-                    view.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(activity, R.string.add_fail, Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
+            Cloud cloud = new Cloud();
+            boolean success;
+            try {
+                success = cloud.addEntryToLeaderboard(name, score);
+            } catch (IOException e) {
+                e.printStackTrace();
+                success = false;
+            }
+            if(!success) {
+                /*
+                 * If we fail to save, display a toast
+                 */
+                view.post(() -> Toast.makeText(activity, R.string.add_fail, Toast.LENGTH_SHORT).show());
             }
         }).start();
     }
 
     /**
-     * Moves back to main homepage activity
+     * Move back to main homepage activity
      */
     private void moveToMainActivity() {
-        Intent intent = new Intent(LostActivity.this, MainActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    /**
+     * Move back to trivia activity
+     */
+    private void moveToTriviaActivity() {
+        // Move to trivia activity
+        Intent intent = new Intent(this, TriviaActivity.class);
+        intent.putExtra("category", this.category);
+        intent.putExtra("subcategory", this.subCategory);
+        startActivity(intent);
+        finish();
+    }
+
+    /**
+     * Hide soft keyboard
+     */
+    public void hideSoftKeyboard() {
+        InputMethodManager inputMethodManager =
+                (InputMethodManager) this.getSystemService(
+                        this.INPUT_METHOD_SERVICE);
+        if(inputMethodManager.isAcceptingText()){
+            inputMethodManager.hideSoftInputFromWindow(
+                    this.getCurrentFocus().getWindowToken(),
+                    0
+            );
+        }
     }
 }

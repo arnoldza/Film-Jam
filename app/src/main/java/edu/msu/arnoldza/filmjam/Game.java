@@ -20,9 +20,9 @@ public class Game {
      * Current state of game
      */
     enum State {
-
+        INIT, CORRECT, WRONG;
     }
-    private State state;
+    private State state = State.INIT;
 
     /**
      * Score of game currently
@@ -56,16 +56,34 @@ public class Game {
         updateUI();
     }
 
+    /**
+     * Get current question
+     */
     public Question getCurrentQuestion() {
         return this.questionSet.get(this.questionIndex);
     }
 
     /**
-     * Move to next question
+     * Upon selecting choice in trivia
      */
-    public void moveToNextQuestion() {
+    public void chooseAnswer(String answer) {
+
+        // If answer is correct
+        if (getCurrentQuestion().getAnswer().equals(answer)) {
+            this.state = State.CORRECT;
+            // Increase score
+            int exponent = questionIndex / 5;
+            this.score += 20 * Math.pow(2, (exponent));
+        } else {
+            this.state = State.WRONG;
+            // Remove life
+            this.livesLeft--;
+            if (this.livesLeft == 0) {
+                this.activity.moveToLostActivity(this.score);
+            }
+        }
         this.questionIndex++;
-        updateUI();
+        this.updateUI();
     }
 
     /**
@@ -93,7 +111,7 @@ public class Game {
         String choiceD = choicesArray.get(D);
 
         // Activity updates UI
-        activity.updateUI(this.livesLeft, this.score,
+        activity.updateGameDataView(this.state, this.livesLeft, this.score,
                 question, posterPath, choiceA, choiceB, choiceC, choiceD);
     }
 }

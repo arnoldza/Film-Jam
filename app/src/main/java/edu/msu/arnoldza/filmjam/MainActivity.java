@@ -39,11 +39,15 @@ public class MainActivity extends AppCompatActivity {
     public static final String _2000s = "2000s";
     public static final String _2010s = "2010s";
 
-    // Represent the category (and possible subcategory) of the trivia game
+    /**
+     * Represent the category (and possible subcategory) of the trivia game
+     */
     private String category;
     private String subCategory;
 
-    // Subcategory Spinner Adapters
+    /**
+     * Subcategory Spinner Adapters
+     */
     private ArrayAdapter<String> genreAdapter;
     private ArrayAdapter<String> decadesAdapter;
 
@@ -156,24 +160,21 @@ public class MainActivity extends AppCompatActivity {
     private void setupGenreSpinnerAdapter() {
 
         // Execute tasks in non-UI thread
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+        new Thread(() -> {
 
-                // Get genres from API call
-                MovieAPI movieAPI = new MovieAPI();
-                ArrayList<Genre> genres = movieAPI.getGenres();
+            // Get genres from API call
+            MovieAPI movieAPI = new MovieAPI();
+            ArrayList<Genre> genres = movieAPI.getGenres();
 
-                // Populate spinner with genres
-                ArrayList<String> spinnerGenres = new ArrayList<>();
-                for (Genre genre : genres) {
-                    spinnerGenres.add(genre.getName());
-                }
-
-                // Set up adapter
-                genreAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, spinnerGenres);
-                genreAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            // Populate spinner with genres
+            ArrayList<String> spinnerGenres = new ArrayList<>();
+            for (Genre genre : genres) {
+                spinnerGenres.add(genre.getName());
             }
+
+            // Set up adapter
+            genreAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, spinnerGenres);
+            genreAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         }).start();
     }
 
