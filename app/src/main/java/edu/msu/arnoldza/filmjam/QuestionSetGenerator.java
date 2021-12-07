@@ -1,10 +1,8 @@
 package edu.msu.arnoldza.filmjam;
 
-import static edu.msu.arnoldza.filmjam.MainActivity.DECADES;
 import static edu.msu.arnoldza.filmjam.MainActivity.GENRES;
 import static edu.msu.arnoldza.filmjam.MainActivity.NOW_PLAYING;
 import static edu.msu.arnoldza.filmjam.MainActivity.POPULAR;
-import static edu.msu.arnoldza.filmjam.MainActivity.TOP_RATED;
 
 import android.util.Log;
 
@@ -43,173 +41,37 @@ public class QuestionSetGenerator {
      */
     public ArrayList<Question> generateQuestionSet(String category, String subcategory) {
 
-        switch(category) {
-            case POPULAR:
-                return generatePopularSet();
-            case TOP_RATED:
-                return generateTopRatedSet();
-            case NOW_PLAYING:
-                return generateNowPlayingSet();
-            case GENRES:
-                return generateGenreSet(MainActivity.genreIds.get(subcategory));
-            case DECADES:
-                return generateDecadeSet(MainActivity.decadeValues.get(subcategory));
-        }
-        return null;
-    }
-
-    private ArrayList<Question> generatePopularSet() {
-
         // Get movies
         MovieAPI movieAPI = new MovieAPI();
 
         // Set of questions
         final ArrayList<Question> questionSet = new ArrayList<>();
 
-        Thread t = new Thread(() -> {
-            ArrayList<Movie> movies = movieAPI.getPopularMovies();
+        final ArrayList<Movie> movies;
 
+        // Get movies
+        movies = movieAPI.getMovies(category, subcategory);
+
+        // If no movies generated, return null
+        if (movies == null) {
+            Log.e("QuestionSet", "Failed to generate question set");
+            return null;
+        }
+
+        // Add questions
+        if (!category.equals(POPULAR) && !category.equals(NOW_PLAYING)) {
             addReleaseYearQuestions(questionSet, movies);
-            addActorQuestions(questionSet, movies);
-            addOverviewQuestions(questionSet, movies);
-        });
-
-        // Start thread and wait for its completion
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
-
-        // Return set of questions
-        Collections.shuffle(questionSet);
-        Log.i("QuestionSet", "Successfully generated random question set of length" + questionSet.size());
-        return questionSet;
-    }
-
-    private ArrayList<Question> generateTopRatedSet() {
-        // Get movies
-        MovieAPI movieAPI = new MovieAPI();
-
-        // Set of questions
-        final ArrayList<Question> questionSet = new ArrayList<>();
-
-        Thread t = new Thread(() -> {
-            ArrayList<Movie> movies = movieAPI.getTopRatedMovies();
-
-            addReleaseYearQuestions(questionSet, movies);
-            addActorQuestions(questionSet, movies);
+        addActorQuestions(questionSet, movies);
+        if (category.equals(GENRES)) {
             addOverviewQuestions(questionSet, movies);
-        });
-
-        // Start thread and wait for its completion
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // Return set of questions
-        Collections.shuffle(questionSet);
-        Log.i("QuestionSet", "Successfully generated random question set of length" + questionSet.size());
-        return questionSet;
-    }
-
-    private ArrayList<Question> generateNowPlayingSet() {
-
-        // Get movies
-        MovieAPI movieAPI = new MovieAPI();
-
-        // Set of questions
-        final ArrayList<Question> questionSet = new ArrayList<>();
-
-        Thread t = new Thread(() -> {
-            ArrayList<Movie> movies = movieAPI.getNowPlayingMovies();
-
-            addActorQuestions(questionSet, movies);
-            addOverviewQuestions(questionSet, movies);
-        });
-
-        // Start thread and wait for its completion
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // Return set of questions
-        Collections.shuffle(questionSet);
-        Log.i("QuestionSet", "Successfully generated random question set of length" + questionSet.size());
-        return questionSet;
-    }
-
-    /**
-     * Generate question set based off specific genre
-     */
-    private ArrayList<Question> generateGenreSet(int genreId) {
-
-        // Get movies
-        MovieAPI movieAPI = new MovieAPI();
-
-        // Set of questions
-        final ArrayList<Question> questionSet = new ArrayList<>();
-
-        Thread t = new Thread(() -> {
-            ArrayList<Movie> movies = movieAPI.getMoviesByGenre(genreId);
-
-            addReleaseYearQuestions(questionSet, movies);
-            addActorQuestions(questionSet, movies);
-            addOverviewQuestions(questionSet, movies);
-        });
-
-        // Start thread and wait for its completion
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // Return set of questions
-        Collections.shuffle(questionSet);
-        Log.i("QuestionSet", "Successfully generated random question set of length" + questionSet.size());
-        return questionSet;
-    }
-
-    /**
-     * Generate question set based off specific decade
-     */
-    private ArrayList<Question> generateDecadeSet(int decade) {
-
-        // Get movies
-        MovieAPI movieAPI = new MovieAPI();
-
-        // Set of questions
-        final ArrayList<Question> questionSet = new ArrayList<>();
-
-        Thread t = new Thread(() -> {
-            ArrayList<Movie> movies = movieAPI.getMoviesByDecade(decade);
-
-            addReleaseYearQuestions(questionSet, movies);
-            addActorQuestions(questionSet, movies);
-            addOverviewQuestions(questionSet, movies);
-        });
-
-        // Start thread and wait for its completion
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
 
         // Return set of questions
         Collections.shuffle(questionSet);
         Log.i("QuestionSet", "Successfully generated random question set of length " + questionSet.size());
         return questionSet;
+
     }
 
     /**
@@ -219,37 +81,40 @@ public class QuestionSetGenerator {
         // For each movie generate date question
         for (Movie movie : movies) {
 
-            // Get release year and generate question
-            int year = Integer.parseInt(movie.getReleaseDate().substring(0, 4));
+            if(movie.getReleaseDate() != null && !movie.getReleaseDate().isEmpty()) {
 
-            // Question parameters
-            String posterPath = POSTER_BASE_PATH + movie.getPosterPath();
-            String question = "What year did " + movie.getTitle() + " release?";
-            String answer = String.valueOf(year);
-            ArrayList<String> incorrectAnswers = new ArrayList<>();
+                // Get release year and generate question
+                int year = Integer.parseInt(movie.getReleaseDate().substring(0, 4));
 
-            // Get current year so answers can't be future years
-            int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+                // Question parameters
+                String posterPath = POSTER_BASE_PATH + movie.getPosterPath();
+                String question = "What year did " + movie.getTitle() + " release?";
+                String answer = String.valueOf(year);
+                ArrayList<String> incorrectAnswers = new ArrayList<>();
 
-            // Get list of close years to answer
-            ArrayList<Integer> randomYearDifferences = new ArrayList<>();
-            for(int i = 1; i <= RANDOM_YEAR_MARGIN; i++) {
-                // Add year + i and year - i
-                if (year + i <= currentYear) {
-                    // Don't add future years
-                    randomYearDifferences.add(year + i);
+                // Get current year so answers can't be future years
+                int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+
+                // Get list of close years to answer
+                ArrayList<Integer> randomYearDifferences = new ArrayList<>();
+                for (int i = 1; i <= RANDOM_YEAR_MARGIN; i++) {
+                    // Add year + i and year - i
+                    if (year + i <= currentYear) {
+                        // Don't add future years
+                        randomYearDifferences.add(year + i);
+                    }
+                    randomYearDifferences.add(year - i);
                 }
-                randomYearDifferences.add(year - i);
+
+                // Shuffle possible years
+                Collections.shuffle(randomYearDifferences);
+
+                for (int i = 0; i < NUM_INCORRECT_ANSWERS; i++) {
+                    incorrectAnswers.add(String.valueOf(randomYearDifferences.get(i)));
+                }
+
+                questionSet.add(new Question(question, answer, incorrectAnswers, posterPath));
             }
-
-            // Shuffle possible years
-            Collections.shuffle(randomYearDifferences);
-
-            for (int i = 0; i < NUM_INCORRECT_ANSWERS; i++) {
-                incorrectAnswers.add(String.valueOf(randomYearDifferences.get(i)));
-            }
-
-            questionSet.add(new Question(question, answer, incorrectAnswers, posterPath));
         }
     }
 
@@ -269,7 +134,7 @@ public class QuestionSetGenerator {
             // Only generate questions for movies with at least 4 entries
             if (movieCast.size() >= 4) {
 
-                List<Cast> randomCast = movieCast;
+                List<Cast> randomCast = new ArrayList<>(movieCast);
                 for (Cast member : movieCast) {
 
                     Collections.shuffle(randomCast);
@@ -320,15 +185,14 @@ public class QuestionSetGenerator {
      */
     private void addOverviewQuestions(ArrayList<Question> questionSet, ArrayList<Movie> movies) {
 
-        ArrayList<Movie> randomMovies = movies;
+        ArrayList<Movie> randomMovies = new ArrayList<>(movies);
         for (Movie movie : movies) {
-            String overview = movie.getOverview();
+            String question = movie.getOverview();
 
-            if(!overview.isEmpty()) {
+            if(!question.isEmpty()) {
                 Collections.shuffle(randomMovies);
 
                 // Question parameters
-                String question = overview;
                 String answer = movie.getTitle();
                 ArrayList<String> incorrectAnswers = new ArrayList<>();
 
@@ -342,11 +206,7 @@ public class QuestionSetGenerator {
                 }
 
                 questionSet.add(new Question(question, answer, incorrectAnswers, null));
-
             }
-
         }
     }
-
-
 }

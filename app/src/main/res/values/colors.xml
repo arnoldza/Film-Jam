@@ -9,4 +9,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="correct">#19BD20</color>
     <color name="wrong">#C11515</color>
+    <color name="primary">#7E0505</color>
+    <color name="secondary">#FF161616</color>
 </resources>

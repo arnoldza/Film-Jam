@@ -3,10 +3,12 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/back.xml" value="0.67" />
+        <entry key="app/src/main/res/drawable/text_box.xml" value="0.46875" />
         <entry key="app/src/main/res/layout/activity_create.xml" value="0.18177083333333333" />
-        <entry key="app/src/main/res/layout/activity_lost.xml" value="0.3812624723857311" />
-        <entry key="app/src/main/res/layout/activity_main.xml" value="0.45" />
-        <entry key="app/src/main/res/layout/activity_trivia.xml" value="0.45" />
+        <entry key="app/src/main/res/layout/activity_lost.xml" value="0.22" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.67" />
+        <entry key="app/src/main/res/layout/activity_trivia.xml" value="0.5959595959595959" />
         <entry key="app/src/main/res/layout/leaderboard_dlg.xml" value="0.5218253968253969" />
         <entry key="app/src/main/res/layout/leaderboard_entry.xml" value="0.5218253968253969" />
         <entry key="app/src/main/res/layout/show_dlg.xml" value="0.45436507936507936" />

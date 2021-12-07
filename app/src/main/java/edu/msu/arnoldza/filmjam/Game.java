@@ -30,12 +30,12 @@ public class Game {
     /**
      * Number of lives left in game
      */
-    private int livesLeft = 3;
+    private int livesLeft = 5;
 
     /**
      * Question set being used in game
      */
-    private ArrayList<Question> questionSet;
+    private final ArrayList<Question> questionSet;
 
     /**
      * Index position of current question in question set
@@ -45,7 +45,7 @@ public class Game {
     /**
      * Activity of trivia game
      */
-    private TriviaActivity activity;
+    private final TriviaActivity activity;
 
     public Game(TriviaActivity activity, ArrayList<Question> questionSet) {
         this.activity = activity;

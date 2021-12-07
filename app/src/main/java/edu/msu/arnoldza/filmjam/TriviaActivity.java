@@ -6,9 +6,10 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -25,51 +26,9 @@ import java.util.ArrayList;
 public class TriviaActivity extends AppCompatActivity {
 
     /**
-     * Nested helper class downloads poster image for use in poster image view
-     */
-    private static class DownLoadImageTask extends AsyncTask<String,Void, Bitmap> {
-        ImageView imageView;
-
-        public DownLoadImageTask(ImageView imageView){
-            this.imageView = imageView;
-        }
-
-
-        /**
-         * Override this method to perform a computation on a background thread.
-         */
-        protected Bitmap doInBackground(String...urls){
-            String urlOfImage = urls[0];
-            Bitmap logo = null;
-            try{
-                InputStream is = new URL(urlOfImage).openStream();
-
-                // Decode an input stream into a bitmap.
-                logo = BitmapFactory.decodeStream(is);
-            }catch(Exception e){ // Catch the download exception
-                e.printStackTrace();
-            }
-            return logo;
-        }
-
-        /**
-         * Runs on the UI thread after doInBackground(Params...)
-         */
-        protected void onPostExecute(Bitmap result){
-            // Set Question along with image load
-            this.imageView.setImageBitmap(result);
-        }
-    }
-
-    /**
      * Time in milliseconds for response message to be visible
      */
     private static final int MESSAGE_INTERVAL_MILLISECONDS = 2000;
-
-    /**
-     * Question set generator class
-     */
-    private final QuestionSetGenerator questionSetGenerator = new QuestionSetGenerator();
 
     /**
      * Game currently being played
@@ -81,6 +40,11 @@ public class TriviaActivity extends AppCompatActivity {
      */
     private String category;
     private String subCategory;
+
+    /**
+     * String represents current posterPath
+     */
+    private String poster;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,11 +59,9 @@ public class TriviaActivity extends AppCompatActivity {
             this.subCategory = categories.getString("subcategory");
         }
 
-        // Generate question set for game
-        ArrayList<Question> questionSet = this.questionSetGenerator.generateQuestionSet(this.category, this.subCategory);
-
-        // Create game
-        this.game = new Game(this, questionSet);
+        // Generate trivia question set
+        GeneratingDlg generatingDlg = new GeneratingDlg(this, this.category, this.subCategory);
+        generatingDlg.show(getSupportFragmentManager(), "generating");
 
         // Set on click listeners for choice buttons
         getChoiceAButton().setOnClickListener(view -> game.chooseAnswer(getChoiceAButton().getText().toString()));
@@ -109,8 +71,16 @@ public class TriviaActivity extends AppCompatActivity {
 
     }
 
+    public void createGame(ArrayList<Question> questionSet) {
+        this.game = new Game(this, questionSet);
+    }
+
     private TextView getQuestionTextView() {
         return findViewById(R.id.questionTextView);
+    }
+
+    private ImageView getPosterImageView() {
+        return findViewById(R.id.posterImageView);
     }
 
     /**
@@ -163,15 +133,21 @@ public class TriviaActivity extends AppCompatActivity {
         ImageView heartOne = findViewById(R.id.heartOneImageView);
         ImageView heartTwo = findViewById(R.id.heartTwoImageView);
         ImageView heartThree = findViewById(R.id.heartThreeImageView);
+        ImageView heartFour = findViewById(R.id.heartFourImageView);
+        ImageView heartFive = findViewById(R.id.heartFiveImageView);
 
         // If heart images to null depending on whether or not the heart exists
         switch(livesLeft) {
             case 0:
-                heartOne.setImageDrawable(null);
+                heartOne.setImageResource(android.R.color.transparent);
             case 1:
-                heartTwo.setImageDrawable(null);
+                heartTwo.setImageResource(android.R.color.transparent);
             case 2:
-                heartThree.setImageDrawable(null);
+                heartThree.setImageResource(android.R.color.transparent);
+            case 3:
+                heartFour.setImageResource(android.R.color.transparent);
+            case 4:
+                heartFive.setImageResource(android.R.color.transparent);
         }
 
         // Set score text view
@@ -180,7 +156,27 @@ public class TriviaActivity extends AppCompatActivity {
         scoreTextView.setText(scoreText);
 
         // Set poster image view
-        new DownLoadImageTask(findViewById(R.id.posterImageView)).execute(posterPath);
+        this.poster = posterPath;
+        if (posterPath != null) {
+            Log.i("PosterPath", posterPath);
+            View view = findViewById(android.R.id.content).getRootView();
+            new Thread(() -> {
+                try {
+                    URL url = new URL(posterPath);
+                    InputStream is = url.openStream();
+                    Bitmap bitmap = BitmapFactory.decodeStream(is);
+                    view.post(() -> {
+                        if (posterPath.equals(this.poster)) {
+                            getPosterImageView().setImageBitmap(bitmap);
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.e("PosterPath", "Error setting poster: ", e);
+                }
+            }).start();
+        } else {
+            getPosterImageView().setImageResource(android.R.color.transparent);
+        }
 
         // Set answer button text
         getChoiceAButton().setText(a);

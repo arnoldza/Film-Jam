@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/secondary"
     android:orientation="vertical"
     tools:context=".MainActivity">
 
@@ -11,7 +12,7 @@
         android:layout_height="0dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
-        android:layout_weight="2">
+        android:layout_weight="2.5">
 
         <Button
             android:id="@+id/leaderboardButton"
@@ -21,7 +22,9 @@
             android:layout_centerVertical="false"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
-            android:text="@string/leaderboard" />
+            android:text="@string/leaderboard"
+            android:textStyle="bold|italic"
+            android:typeface="serif"/>
 
     </RelativeLayout>
 
@@ -34,6 +37,7 @@
         android:gravity="center"
         android:text="@string/title"
         android:textAlignment="center"
+        android:textColor="@color/white"
         android:textSize="60sp"
         android:textStyle="bold|italic"
         android:typeface="serif" />
@@ -43,9 +47,10 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="10dp"
-        android:layout_weight="2"
-        android:gravity="center"
+        android:layout_weight="3"
+        android:gravity="center_horizontal"
         android:text="@string/subtitle"
+        android:textColor="@color/white"
         android:textSize="16sp"
         android:textStyle="bold|italic"
         android:typeface="serif" />
@@ -55,25 +60,28 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="10dp"
-        android:layout_weight="1"
+        android:layout_weight="1.5"
         android:gravity="bottom"
         android:text="@string/category"
+        android:textColor="@color/white"
         android:textSize="14sp"
+        android:textStyle="italic"
         android:typeface="serif" />
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2">
+        android:layout_weight="3">
 
         <Spinner
             android:id="@+id/categorySpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:layout_marginEnd="10dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/text_box"
             android:minHeight="48dp"
             tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
@@ -82,16 +90,17 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2">
+        android:layout_weight="3">
 
         <Spinner
             android:id="@+id/subCategorySpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:layout_marginEnd="10dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/text_box"
             android:minHeight="48dp"
             tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
     </RelativeLayout>
@@ -106,6 +115,7 @@
         android:backgroundTint="#8A2020"
         android:text="@string/start"
         android:textSize="20sp"
+        android:textStyle="bold|italic"
         android:typeface="serif" />
 
 </LinearLayout>

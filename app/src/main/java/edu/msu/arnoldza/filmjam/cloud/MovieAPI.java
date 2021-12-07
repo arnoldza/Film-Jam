@@ -1,10 +1,19 @@
 package edu.msu.arnoldza.filmjam.cloud;
 
+import static edu.msu.arnoldza.filmjam.MainActivity.DECADES;
+import static edu.msu.arnoldza.filmjam.MainActivity.GENRES;
+import static edu.msu.arnoldza.filmjam.MainActivity.NOW_PLAYING;
+import static edu.msu.arnoldza.filmjam.MainActivity.POPULAR;
+import static edu.msu.arnoldza.filmjam.MainActivity.TOP_RATED;
+
 import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
+import edu.msu.arnoldza.filmjam.MainActivity;
 import edu.msu.arnoldza.filmjam.cloud.models.Cast;
 import edu.msu.arnoldza.filmjam.cloud.models.CreditsResult;
 import edu.msu.arnoldza.filmjam.cloud.models.Genre;
@@ -41,9 +50,25 @@ public class MovieAPI {
     public static final String GET_TOP_RATED_PATH = "movie/top_rated";
 
     /**
+     * Total number of pages to retrieve via API calls when returning movies
+     */
+    private static final int TOTAL_NUM_PAGES = 5;
+
+    /**
+     * Number of cast members to retrieve from API call
+     */
+    private static final int TOTAL_SIZE_CAST = 5;
+
+    /**
+     * Integer representations of cast member's gender
+     */
+    private static final int MALE = 2;
+    private static final int FEMALE = 1;
+
+    /**
      * Retrofit
      */
-    private static Retrofit retrofit = new Retrofit.Builder()
+    private static final Retrofit retrofit = new Retrofit.Builder()
             .baseUrl(MOVIE_BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build();
@@ -76,142 +101,67 @@ public class MovieAPI {
     }
 
     /**
-     * Get list of popular movies from Movie DB API
+     * Get list of movies from Movie DB API
      */
-    public ArrayList<Movie> getPopularMovies() {
+    public ArrayList<Movie> getMovies(String category, String subcategory) {
 
         MovieService api = retrofit.create(MovieService.class);
+        ArrayList<Movie> movies = new ArrayList<>();
 
-        try {
-            Response response = api.getPopular(MOVIE_API_KEY).execute();
-            if (response.isSuccessful()) {
-                MoviesResult result = (MoviesResult) response.body();
-                if (!result.getMovies().isEmpty()) {
-                    Log.i("GetPopularMovies", "Successful retrieval of movies");
-                    return result.getMovies();
-                } else {
-                    Log.e("GetPopularMovies", "No movies retrieved");
+        for (int pageNum = 1; pageNum <= TOTAL_NUM_PAGES; pageNum++) {
+            try {
+                Response response = makeMoviesAPICall(category, subcategory, api, pageNum);
+                if (response.isSuccessful()) {
+                    MoviesResult result = (MoviesResult) response.body();
+                    if (result.getMovies().isEmpty()) {
+                        break;
+                    }
+                    movies.addAll(result.getMovies());
                 }
-            }
 
-        } catch (IOException e) {
-            Log.e("GetPopularMovies", "Exception occurred while trying to get movies!", e);
-        } catch (RuntimeException e) {
-            Log.e("GetPopularMovies", "Runtime exception: " + e);
+            } catch (IOException e) {
+                Log.e("GetMovies", "Exception occurred while trying to get movies!", e);
+                return new ArrayList<>();
+            } catch (RuntimeException e) {
+                Log.e("GetMovies", "Runtime exception: " + e);
+                return new ArrayList<>();
+            }
         }
-        return new ArrayList<>();
+        if (movies.isEmpty()) {
+            Log.e("GetMovies", "No movies retrieved");
+        } else {
+            Log.i("GetMovies", "Successful retrieval of movies");
+        }
+        return movies;
     }
 
     /**
-     * Get list of top rated movies from Movie DB API
+     * Make API call given category, helper function for get movies
      */
-    public ArrayList<Movie> getTopRatedMovies() {
+    private Response makeMoviesAPICall(String category, String subcategory, MovieService api, int pageNum) throws IOException {
+        switch(category) {
+            case POPULAR:
+                return api.getPopular(MOVIE_API_KEY, String.valueOf(pageNum)).execute();
+            case TOP_RATED:
+                return api.getTopRated(MOVIE_API_KEY, String.valueOf(pageNum)).execute();
+            case NOW_PLAYING:
+                return api.getNowPlaying(MOVIE_API_KEY, String.valueOf(pageNum)).execute();
+            case GENRES:
+                // Get genre id
+                int genreId = MainActivity.genreIds.get(subcategory);
 
-        MovieService api = retrofit.create(MovieService.class);
+                return api.getByGenre(MOVIE_API_KEY, String.valueOf(genreId), String.valueOf(pageNum)).execute();
+            case DECADES:
+                // Get decade value
+                int decade = MainActivity.decadeValues.get(subcategory);
 
-        try {
-            Response response = api.getTopRated(MOVIE_API_KEY).execute();
-            if (response.isSuccessful()) {
-                MoviesResult result = (MoviesResult) response.body();
-                if (!result.getMovies().isEmpty()) {
-                    Log.i("GetTopRatedMovies", "Successful retrieval of movies");
-                    return result.getMovies();
-                } else {
-                    Log.e("GetTopRatedMovies", "No movies retrieved");
-                }
-            }
+                // Get lower and upper bounds for movie release dates
+                String releaseDateGTE = decade + "-01-01";
+                String releaseDateLTE = (decade + 9) + "-12-31";
 
-        } catch (IOException e) {
-            Log.e("GetTopRatedMovies", "Exception occurred while trying to get movies!", e);
-        } catch (RuntimeException e) {
-            Log.e("GetTopRatedMovies", "Runtime exception: " + e);
+                return api.getByDecade(MOVIE_API_KEY, releaseDateGTE, releaseDateLTE, String.valueOf(pageNum)).execute();
         }
-        return new ArrayList<>();
-    }
-
-    /**
-     * Get list of now playing movies from Movie DB API
-     */
-    public ArrayList<Movie> getNowPlayingMovies() {
-
-        MovieService api = retrofit.create(MovieService.class);
-
-        try {
-            Response response = api.getNowPlaying(MOVIE_API_KEY).execute();
-            if (response.isSuccessful()) {
-                MoviesResult result = (MoviesResult) response.body();
-                if (!result.getMovies().isEmpty()) {
-                    Log.i("GetNowPlayingMovies", "Successful retrieval of movies");
-                    return result.getMovies();
-                } else {
-                    Log.e("GetNowPlayingMovies", "No movies retrieved");
-                }
-            }
-
-        } catch (IOException e) {
-            Log.e("GetNowPlayingMovies", "Exception occurred while trying to get movies!", e);
-        } catch (RuntimeException e) {
-            Log.e("GetNowPlayingMovies", "Runtime exception: " + e);
-        }
-        return new ArrayList<>();
-    }
-
-    /**
-     * Get list of movies from Movie DB API by genre
-     */
-    public ArrayList<Movie> getMoviesByGenre(int genreId) {
-
-        MovieService api = retrofit.create(MovieService.class);
-
-        try {
-            Response response = api.getByGenre(MOVIE_API_KEY, String.valueOf(genreId)).execute();
-            if (response.isSuccessful()) {
-                MoviesResult result = (MoviesResult) response.body();
-                if (!result.getMovies().isEmpty()) {
-                    Log.i("GetMoviesByGenre", "Successful retrieval of movies");
-                    return result.getMovies();
-                } else {
-                    Log.e("GetMoviesByGenre", "No movies retrieved");
-                }
-            }
-
-        } catch (IOException e) {
-            Log.e("GetMoviesByGenre", "Exception occurred while trying to get movies!", e);
-        } catch (RuntimeException e) {
-            Log.e("GetMoviesByGenre", "Runtime exception: " + e);
-        }
-        return new ArrayList<>();
-    }
-
-    /**
-     * Get list of movies from Movie DB API by decade
-     */
-    public ArrayList<Movie> getMoviesByDecade(int decade) {
-
-        MovieService api = retrofit.create(MovieService.class);
-
-        // Get lower and upper bounds for movie release dates
-        String releaseDateGTE = decade + "-01-01";
-        String releaseDateLTE = (decade + 9) + "-12-31";
-
-        try {
-            Response response = api.getByDecade(MOVIE_API_KEY, releaseDateGTE, releaseDateLTE).execute();
-            if (response.isSuccessful()) {
-                MoviesResult result = (MoviesResult) response.body();
-                if (!result.getMovies().isEmpty()) {
-                    Log.i("GetMoviesByDecade", "Successful retrieval of movies");
-                    return result.getMovies();
-                } else {
-                    Log.e("GetMoviesByDecade", "No movies retrieved");
-                }
-            }
-
-        } catch (IOException e) {
-            Log.e("GetMoviesByDecade", "Exception occurred while trying to get movies!", e);
-        } catch (RuntimeException e) {
-            Log.e("GetMoviesByDecade", "Runtime exception: " + e);
-        }
-        return new ArrayList<>();
+        return null;
     }
 
     /**
@@ -227,18 +177,35 @@ public class MovieAPI {
                 CreditsResult result = (CreditsResult) response.body();
                 if (!result.getCast().isEmpty()) {
                     Log.i("GetMovieCast", "Successful retrieval of cast");
-                    ArrayList<Cast> movieCast = new ArrayList<>();
+                    ArrayList<Cast> movieCastMale = new ArrayList<>();
+                    ArrayList<Cast> movieCastFemale = new ArrayList<>();
 
-                    // Get the first 5 entries with no blank entries
+                    Set<String> actors = new HashSet<>();
+                    Set<String> characters = new HashSet<>();
+
+                    // Get the first 5 entries with no blank entries, no duplicates
                     for(Cast member : result.getCast()) {
-                        if (!member.getName().isEmpty() && !member.getCharacter().isEmpty()) {
-                            movieCast.add(member);
-                            if (movieCast.size() == 5) {
-                                break;
+                        if (!member.getName().isEmpty() && !member.getCharacter().isEmpty()
+                        && !actors.contains(member.getName()) && !characters.contains(member.getCharacter())) {
+
+                            // Add results to sets to prevent duplicates
+                            actors.add(member.getName());
+                            characters.add(member.getCharacter());
+
+                            // Add cast member
+                            if(member.getGender() == MALE) {
+                                movieCastMale.add(member);
+                                if (movieCastMale.size() == TOTAL_SIZE_CAST) {
+                                    return movieCastMale;
+                                }
+                            } else if(member.getGender() == FEMALE) {
+                                movieCastFemale.add(member);
+                                if (movieCastFemale.size() == TOTAL_SIZE_CAST) {
+                                    return movieCastFemale;
+                                }
                             }
                         }
                     }
-                    return movieCast;
                 } else {
                     Log.e("GetMovieCast", "No cast returned");
                 }

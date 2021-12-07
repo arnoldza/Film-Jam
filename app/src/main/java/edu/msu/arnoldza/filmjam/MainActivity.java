@@ -85,10 +85,9 @@ public class MainActivity extends AppCompatActivity {
 
             // Move to trivia activity
             Intent intent = new Intent(this, TriviaActivity.class);
-            intent.putExtra("category",category);
+            intent.putExtra("category", category);
             intent.putExtra("subcategory", subCategory);
             startActivity(intent);
-            finish();
         });
 
     }
@@ -120,7 +119,9 @@ public class MainActivity extends AppCompatActivity {
                 String category = getCategorySpinner().getSelectedItem().toString();
 
                 // Enable subcategory spinner if necessary
-                getSubCategorySpinner().setEnabled(category.equals(GENRES) || category.equals(DECADES));
+                boolean showSubCategorySpinner = category.equals(GENRES) || category.equals(DECADES);
+                getSubCategorySpinner().setEnabled(showSubCategorySpinner);
+                getSubCategorySpinner().setVisibility(showSubCategorySpinner ? View.VISIBLE : View.GONE);
 
                 // Set subcategory spinner adapter
                 if (category.equals(GENRES)) {

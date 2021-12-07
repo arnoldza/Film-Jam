@@ -23,14 +23,16 @@ public interface MovieService {
     @GET(MOVIE_DISCOVER_PATH)
     Call<MoviesResult> getByGenre(
             @Query("api_key") String apiKey,
-            @Query("with_genres") String withGenres
+            @Query("with_genres") String withGenres,
+            @Query("page") String page
     );
 
     @GET(MOVIE_DISCOVER_PATH)
     Call<MoviesResult> getByDecade(
             @Query("api_key") String apiKey,
             @Query("primary_release_date.gte") String releaseDateGTE,
-            @Query("primary_release_date.lte") String releaseDateLTE
+            @Query("primary_release_date.lte") String releaseDateLTE,
+            @Query("page") String page
     );
 
     @GET(GET_GENRES_PATH)
@@ -46,17 +48,20 @@ public interface MovieService {
 
     @GET(GET_NOW_PLAYING_PATH)
     Call<MoviesResult> getNowPlaying(
-            @Query("api_key") String apiKey
+            @Query("api_key") String apiKey,
+            @Query("page") String page
     );
 
     @GET(GET_POPULAR_PATH)
     Call<MoviesResult> getPopular(
-            @Query("api_key") String apiKey
+            @Query("api_key") String apiKey,
+            @Query("page") String page
     );
 
     @GET(GET_TOP_RATED_PATH)
     Call<MoviesResult> getTopRated(
-            @Query("api_key") String apiKey
+            @Query("api_key") String apiKey,
+            @Query("page") String page
     );
 
 }

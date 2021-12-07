@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/secondary"
     android:orientation="vertical">
 
     <TextView
@@ -13,11 +14,13 @@
         android:layout_marginTop="10dp"
         android:layout_marginEnd="20dp"
         android:layout_weight="2"
-        android:fontFamily="monospace"
         android:gravity="center"
         android:text="@string/congrats"
         android:textAlignment="center"
-        android:textSize="24sp" />
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:textStyle="bold|italic"
+        android:typeface="serif" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -37,10 +40,12 @@
             android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             android:gravity="center_horizontal"
             android:inputType="textCapCharacters"
+            android:letterSpacing="0.35"
             android:maxLength="3"
             android:textAlignment="center"
-            android:letterSpacing="0.35"
-            android:textSize="96sp"
+            android:textColor="@color/white"
+            android:textCursorDrawable="@color/white"
+            android:textSize="90sp"
             tools:ignore="SpeakableTextPresentCheck" />
 
     </RelativeLayout>
@@ -51,11 +56,12 @@
         android:layout_height="0dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_weight="1
-"
-        android:fontFamily="monospace"
+        android:layout_weight="1"
+        android:textStyle="bold|italic"
+        android:typeface="serif"
         android:text="@string/enter_initials"
         android:textAlignment="center"
+        android:textColor="@color/white"
         android:textSize="20sp" />
 
     <Button
@@ -65,7 +71,9 @@
         android:layout_marginStart="40dp"
         android:layout_marginEnd="40dp"
         android:layout_weight="1"
-        android:text="@string/same_game" />
+        android:text="@string/same_game"
+        android:textStyle="bold"
+        android:typeface="serif"/>
 
     <Button
         android:id="@+id/menuButton"
@@ -75,6 +83,8 @@
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="10dp"
         android:layout_weight="1.5"
-        android:text="@string/main_menu" />
+        android:text="@string/main_menu"
+        android:textStyle="bold"
+        android:typeface="serif"/>
 
 </LinearLayout>

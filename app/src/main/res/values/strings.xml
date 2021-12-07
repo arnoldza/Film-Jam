@@ -14,8 +14,10 @@
     <string name="same_game">Replay Same Game</string>
     <string name="main_menu">Main Menu</string>
     <string name="add_fail">Failed to add entry to Leaderboard</string>
-    <string name="dummy_answer">Dummy Answer!</string>
-    <string name="dummy_question">This is a dummy question?</string>
+    <string name="empty_string"></string>
     <string name="score">Score: %1d</string>
+    <string name="score_zero">Score: 0</string>
     <string name="sure">I\'m Sure</string>
+    <string name="generating">Generating Trivia...</string>
+    <string name="loading_fail">Failed to load Trivia</string>
 </resources>

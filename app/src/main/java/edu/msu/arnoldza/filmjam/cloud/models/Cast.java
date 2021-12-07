@@ -20,6 +20,10 @@ public class Cast {
     @SerializedName("character")
     private String character;
 
+    @Expose
+    @SerializedName("gender")
+    private int gender;
+
     public int getId() {
         return id;
     }
@@ -44,10 +48,19 @@ public class Cast {
         this.character = character;
     }
 
-    public Cast(int id, String name, String character) {
+    public int getGender() {
+        return gender;
+    }
+
+    public void setGender(int gender) {
+        this.gender = gender;
+    }
+
+    public Cast(int id, String name, String character, int gender) {
         this.id = id;
         this.name = name;
         this.character = character;
+        this.gender = gender;
     }
 
     public Cast() {}

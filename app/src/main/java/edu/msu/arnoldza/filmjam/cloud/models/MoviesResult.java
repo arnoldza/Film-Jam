@@ -19,10 +19,6 @@ public class MoviesResult {
     private ArrayList<Movie> movies;
 
     @Expose
-    @SerializedName("total_results")
-    private int totalResults;
-
-    @Expose
     @SerializedName("total_pages")
     private int totalPages;
 
@@ -42,14 +38,6 @@ public class MoviesResult {
         this.movies = movies;
     }
 
-    public int getTotalResults() {
-        return totalResults;
-    }
-
-    public void setTotalResults(int totalResults) {
-        this.totalResults = totalResults;
-    }
-
     public int getTotalPages() {
         return totalPages;
     }
@@ -58,10 +46,9 @@ public class MoviesResult {
         this.totalPages = totalPages;
     }
 
-    public MoviesResult(int page, ArrayList<Movie> movies, int totalResults, int totalPages) {
+    public MoviesResult(int page, ArrayList<Movie> movies, int totalPages) {
         this.page = page;
         this.movies = movies;
-        this.totalResults = totalResults;
         this.totalPages = totalPages;
     }
 

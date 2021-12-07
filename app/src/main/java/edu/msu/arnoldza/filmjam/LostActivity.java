@@ -72,8 +72,7 @@ public class LostActivity extends AppCompatActivity {
         replayButton.setOnClickListener(view -> {
             if (getInitialsEditText().getText().length() == 3) {
                 addEntryToCloudLeaderboard(getInitialsEditText().getText().toString(),
-                        String.valueOf(finalScore));
-                moveToTriviaActivity();
+                        String.valueOf(finalScore), true);
             } else {
                 // Set positive button on click method to move to trivia activity
                 incompleteInitialsDlg.setPositiveButton(R.string.sure, (dialog, which) -> moveToTriviaActivity());
@@ -86,8 +85,7 @@ public class LostActivity extends AppCompatActivity {
         menuButton.setOnClickListener(view -> {
             if (getInitialsEditText().getText().length() == 3) {
                 addEntryToCloudLeaderboard(getInitialsEditText().getText().toString(),
-                        String.valueOf(finalScore));
-                moveToMainActivity();
+                        String.valueOf(finalScore), false);
             } else {
                 // Set positive button on click method to move to main activity
                 incompleteInitialsDlg.setPositiveButton(R.string.sure, (dialog, which) -> moveToMainActivity());
@@ -137,9 +135,9 @@ public class LostActivity extends AppCompatActivity {
     }
 
     /**
-     * Add a score entry to cloud leaderboard
+     * Add a score entry to cloud leaderboard, and move to new activity
      */
-    private void addEntryToCloudLeaderboard(String name, String score) {
+    private void addEntryToCloudLeaderboard(String name, String score, final boolean replay) {
 
         final View view = findViewById(android.R.id.content).getRootView();
         final LostActivity activity = this;
@@ -154,10 +152,15 @@ public class LostActivity extends AppCompatActivity {
                 e.printStackTrace();
                 success = false;
             }
-            if(!success) {
-                /*
-                 * If we fail to save, display a toast
-                 */
+            if(success) {
+                view.post(() -> {
+                    if (replay) {
+                        moveToTriviaActivity();
+                    } else {
+                        moveToMainActivity();
+                    }
+                });
+            } else {
                 view.post(() -> Toast.makeText(activity, R.string.add_fail, Toast.LENGTH_SHORT).show());
             }
         }).start();
