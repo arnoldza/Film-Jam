@@ -64,51 +64,36 @@ public class Cloud {
          */
         public LeaderboardAdapter(final View view) {
             // Create a thread to load the catalog
-            new Thread(new Runnable() {
+            new Thread(() -> {
+                try {
+                    leaderboard = getLeaderboard();
 
-                @Override
-                public void run() {
-                    try {
-                        leaderboard = getLeaderboard();
-
-                        if (leaderboard.getStatus().equals("no")) {
-                            String msg = "Loading catalog returned status 'no'! Message is = '" + leaderboard.getMessage() + "'";
-                            throw new Exception(msg);
-                        }
-                        if (leaderboard.getEntries().isEmpty()) {
-                            String msg = "Leaderboard does not contain any entries.";
-                            throw new Exception(msg);
-                        }
-
-                        view.post(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                // Tell the adapter the data set has been changed
-                                notifyDataSetChanged();
-                                Log.i("HOFF", "done beeeeeee");
-                            }
-
-                        });
-
-                    } catch (Exception e) {
-                        // Error condition! Something went wrong
-                        Log.e("LeaderboardAdapter", "Something went wrong when loading the leaderboard" + e);
-                        view.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                String string;
-                                // make sure that there is a message in the catalog
-                                // if there isn't use the message from the exception
-                                if (leaderboard.getMessage() == null) {
-                                    string = e.getMessage();
-                                } else {
-                                    string = leaderboard.getMessage();
-                                }
-                                Toast.makeText(view.getContext(), string, Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                    if (leaderboard.getStatus().equals("no")) {
+                        String msg = "Loading catalog returned status 'no'! Message is = '" + leaderboard.getMessage() + "'";
+                        throw new Exception(msg);
                     }
+                    if (leaderboard.getEntries().isEmpty()) {
+                        String msg = "Leaderboard does not contain any entries.";
+                        throw new Exception(msg);
+                    }
+
+                    // Tell the adapter the data set has been changed
+                    view.post(this::notifyDataSetChanged);
+
+                } catch (Exception e) {
+                    // Error condition! Something went wrong
+                    Log.e("LeaderboardAdapter", "Something went wrong when loading the leaderboard" + e);
+                    view.post(() -> {
+                        String string;
+                        // make sure that there is a message in the catalog
+                        // if there isn't use the message from the exception
+                        if (leaderboard.getMessage() == null) {
+                            string = e.getMessage();
+                        } else {
+                            string = leaderboard.getMessage();
+                        }
+                        Toast.makeText(view.getContext(), string, Toast.LENGTH_SHORT).show();
+                    });
                 }
             }).start();
         }

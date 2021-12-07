@@ -88,7 +88,7 @@ public class LostActivity extends AppCompatActivity {
                         String.valueOf(finalScore), false);
             } else {
                 // Set positive button on click method to move to main activity
-                incompleteInitialsDlg.setPositiveButton(R.string.sure, (dialog, which) -> moveToMainActivity());
+                incompleteInitialsDlg.setPositiveButton(R.string.sure, (dialog, which) -> finish());
                 incompleteInitialsDlg.show();
             }
         });
@@ -157,22 +157,13 @@ public class LostActivity extends AppCompatActivity {
                     if (replay) {
                         moveToTriviaActivity();
                     } else {
-                        moveToMainActivity();
+                        finish();
                     }
                 });
             } else {
                 view.post(() -> Toast.makeText(activity, R.string.add_fail, Toast.LENGTH_SHORT).show());
             }
         }).start();
-    }
-
-    /**
-     * Move back to main homepage activity
-     */
-    private void moveToMainActivity() {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-        finish();
     }
 
     /**
